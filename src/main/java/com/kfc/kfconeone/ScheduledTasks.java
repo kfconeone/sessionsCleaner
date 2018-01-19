@@ -18,16 +18,17 @@ public class ScheduledTasks {
 
 
     @Scheduled(fixedRate = 3000000)
-    public void reportCurrentTime() {
+    public void SessionMapCleaner() {
 //        String fileName = DateTimeFormatter.ofPattern("yyyyMMdd_hh:mm:ss").format(ZonedDateTime.now(ZoneOffset.UTC).plusHours(8));
-        log.info("現在時間： {}", DateTimeFormatter.ofPattern("yyyyMMdd_hh:mm:ss").format(ZonedDateTime.now(ZoneOffset.UTC).plusHours(8)));
+        System.out.println("========[CleanSessionMap Start]========");
+        log.info("Current time： {}", DateTimeFormatter.ofPattern("yyyyMMdd_hh:mm:ss").format(ZonedDateTime.now(ZoneOffset.UTC).plusHours(8)));
         try
         {
             Unirest.get("http://localhost:8081/CleanSessionMap")
                     .asJsonAsync(new Callback<>() {
 
                         public void failed(UnirestException e) {
-                            System.out.println("sessions清除失敗");
+                            System.out.println("Clean sessions failed,check server status");
                             e.printStackTrace();
                         }
 
@@ -35,11 +36,12 @@ public class ScheduledTasks {
                             int code = response.getStatus();
                             JsonNode body = response.getBody();
                             System.out.println(String.format("code : %d , body : %s",code,body));
-
+                            System.out.println(String.format("next cleaning time : %s",DateTimeFormatter.ofPattern("yyyyMMdd_hh:mm:ss").format(ZonedDateTime.now(ZoneOffset.UTC).plusHours(8).plusMinutes(30))));
+                            System.out.println("========[CleanSessionMap]========");
                         }
 
                         public void cancelled() {
-                            System.out.println("取消清除sessions");
+                            System.out.println("Cancel session-cleaning ");
                         }
 
                     });
@@ -50,7 +52,7 @@ public class ScheduledTasks {
         {
             ex.printStackTrace();
         }
-
+        System.out.println("========[CleanSessionMap End]========");
     }
 
 
